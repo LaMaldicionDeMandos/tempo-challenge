@@ -9,6 +9,7 @@ class ChallengeApplicationTests {
 
 	@Test
 	void contextLoads() {
+		Assertions.assertTrue(true);
 	}
 
 }
