@@ -1,13 +1,17 @@
 package com.tempo.challenge.services;
 
+import com.tempo.challenge.errors.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
+
 import static java.math.BigDecimal.ONE;
 
 @Service
 public class CalcServiceImpl implements CalcService {
+    private Optional<BigDecimal> lastFee = Optional.empty();
     private static final BigDecimal NORMALIZER_FACTOR = BigDecimal.valueOf(0.01);
     private ExternalService externalService;
 
@@ -23,6 +27,11 @@ public class CalcServiceImpl implements CalcService {
 
 
     private BigDecimal getFee() {
-        return externalService.getFee();
+        try {
+            lastFee = Optional.of(externalService.getFee());
+        } catch (BusinessException ex) {
+            return lastFee.orElseThrow(() -> ex);
+        }
+        return lastFee.get();
     }
 }

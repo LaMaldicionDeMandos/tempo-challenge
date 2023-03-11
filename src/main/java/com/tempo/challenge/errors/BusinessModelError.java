@@ -1,4 +1,4 @@
-package com.tempo.challenge.model;
+package com.tempo.challenge.errors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

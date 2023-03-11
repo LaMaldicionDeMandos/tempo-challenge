@@ -1,23 +1,19 @@
 package com.tempo.challenge.services;
 
-import com.tempo.challenge.ChallengeApplication;
+import com.tempo.challenge.errors.BusinessException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.math.BigDecimal;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static java.math.BigDecimal.TEN;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {ChallengeApplication.class})
+@SpringBootTest
 public class CalcServiceTest {
 
     @Autowired
@@ -42,6 +38,29 @@ public class CalcServiceTest {
         thenShouldReturnAValidResult();
     }
 
+    @Test
+    void externalServiceFailsFirstTime() {
+        givenANumber1();
+        givenANumber2();
+        givenAServiceThatFails();
+
+        assertThatThrownBy(() -> whenTryToCalculateResult()).isInstanceOf(BusinessException.class);
+
+    }
+
+    @Test
+    void externalServiceFailsSecondTime() {
+        givenANumber1();
+        givenANumber2();
+        givenAServiceThatFailsAfterSencondTime();
+
+        whenTryToCalculateResult();
+        whenTryToCalculateResult();
+
+        thenShouldReturnAValidResult();
+
+    }
+
     private void givenANumber1() {
         number1 = TEN;
     }
@@ -52,6 +71,16 @@ public class CalcServiceTest {
 
     private void givenAServiceThatReturnAFeeInPercent() {
         when(externalService.getFee()).thenReturn(TEN);
+    }
+
+    private void givenAServiceThatFails() {
+        when(externalService.getFee()).thenThrow(BusinessException.class);
+    }
+
+    private void givenAServiceThatFailsAfterSencondTime() {
+        when(externalService.getFee())
+                .thenReturn(TEN)
+                .thenThrow(BusinessException.class);
     }
 
     private void whenTryToCalculateResult() {
