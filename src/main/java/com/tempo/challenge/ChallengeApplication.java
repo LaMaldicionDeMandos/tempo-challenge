@@ -2,10 +2,8 @@ package com.tempo.challenge;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("com.tempo.challenge")
 public class ChallengeApplication {
 
 	public static void main(String[] args) {

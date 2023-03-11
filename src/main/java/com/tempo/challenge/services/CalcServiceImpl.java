@@ -17,7 +17,12 @@ public class CalcServiceImpl implements CalcService {
     }
     @Override
     public BigDecimal sumWithFee(BigDecimal number1, BigDecimal number2) {
-        BigDecimal fee = externalService.getFee().multiply(NORMALIZER_FACTOR).add(ONE);
+        BigDecimal fee = getFee().multiply(NORMALIZER_FACTOR).add(ONE);
         return number1.add(number2).multiply(fee);
+    }
+
+
+    private BigDecimal getFee() {
+        return externalService.getFee();
     }
 }

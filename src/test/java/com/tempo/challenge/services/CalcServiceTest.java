@@ -1,17 +1,23 @@
 package com.tempo.challenge.services;
 
-import org.junit.jupiter.api.Assertions;
+import com.tempo.challenge.ChallengeApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.math.BigDecimal;
 
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static java.math.BigDecimal.TEN;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(classes = {ChallengeApplication.class})
 public class CalcServiceTest {
 
     @Autowired
@@ -53,6 +59,6 @@ public class CalcServiceTest {
     }
 
     private void thenShouldReturnAValidResult() {
-        Assertions.assertEquals(BigDecimal.valueOf(22).intValueExact(), result.intValueExact());
+        assertEquals(BigDecimal.valueOf(22).intValueExact(), result.intValueExact());
     }
 }
