@@ -1,16 +1,20 @@
 package com.tempo.challenge.controllers;
 
 import com.tempo.challenge.ChallengeApplication;
+import com.tempo.challenge.errors.BusinessException;
+import com.tempo.challenge.errors.BusinessModelError;
 import com.tempo.challenge.services.CalcService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +33,10 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
 
     @MockBean
     private CalcService service;
+
+    @SpyBean
+    private EndpointInterceptor interceptor;
+
     private String number1;
     private String number2;
 
@@ -75,6 +83,28 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
         thenShouldBeACorrectResult();
     }
 
+    @Test
+    void failsServiceWithBusinessException() throws Exception {
+        givenANumber1();
+        givenANumber2();
+        givenAServiceThatThrowsABusinessException();
+
+        whenTryToSum();
+
+        thenShouldBeA500InternalServerError();
+    }
+
+    @Test
+    void callEndpointInterceptor() throws Exception {
+        givenANumber1();
+        givenANumber2();
+        givenAServiceThatReturnAValue();
+
+        whenTryToSum();
+
+        thenInterceptorShouldBeCalled();
+    }
+
 
     private void givenANumber1() {
         number1 = "5";
@@ -90,6 +120,12 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
 
     private void givenAServiceThatReturnAValue() {
         when(service.sumWithFee(any(BigDecimal.class), any(BigDecimal.class))).thenReturn(BigDecimal.valueOf(11));
+    }
+
+    private void givenAServiceThatThrowsABusinessException() {
+        when(service.sumWithFee(any(BigDecimal.class), any(BigDecimal.class))).thenThrow(
+                new BusinessException(new BusinessModelError("internal_error", "Error with external service."))
+        );
     }
 
     private void whenTryToSumWithNoRequiredParams() throws Exception {
@@ -133,5 +169,19 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
                 .andExpect(header().string("Content-Type", "application/json"))
                 .andExpect(jsonPath("$.result", is(11)))
                 .andReturn();
+    }
+
+    private void thenShouldBeA500InternalServerError() throws Exception {
+        result.andExpect(status().isInternalServerError())
+                .andExpect(header().string("Content-Type", "application/json"))
+                .andExpect(jsonPath("$.error_code", is("internal_error")))
+                .andExpect(jsonPath("$.error_message", is("Error with external service.")))
+                .andReturn();
+    }
+
+    private void thenInterceptorShouldBeCalled() throws Exception {
+        //TimeUnit.SECONDS.sleep(1);
+        verify(interceptor).preHandle(any(), any(), any());
+        verify(interceptor).afterCompletion(any(), any(), any(), any());
     }
 }

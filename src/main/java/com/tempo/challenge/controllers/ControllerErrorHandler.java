@@ -1,5 +1,6 @@
 package com.tempo.challenge.controllers;
 
+import com.tempo.challenge.errors.BusinessException;
 import com.tempo.challenge.errors.BusinessModelError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,6 +24,13 @@ public class ControllerErrorHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<BusinessModelError> handleInvalidParamType(final MethodArgumentTypeMismatchException ex) {
         return createError(INVALID_PARAM, ex.getMessage());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<BusinessModelError> handleBusinessError(final BusinessException ex) {
+        return ResponseEntity.internalServerError()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(ex.getError());
     }
 
     private ResponseEntity<BusinessModelError> createError(final String errorCode, final String errorMessage) {
