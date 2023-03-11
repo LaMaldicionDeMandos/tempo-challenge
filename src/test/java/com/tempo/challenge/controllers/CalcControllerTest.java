@@ -37,6 +37,9 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
     @SpyBean
     private EndpointInterceptor interceptor;
 
+    @MockBean
+    private EndpointInterceptorExecutor interceptorExecutor;
+
     private String number1;
     private String number2;
 
@@ -180,8 +183,7 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
     }
 
     private void thenInterceptorShouldBeCalled() throws Exception {
-        //TimeUnit.SECONDS.sleep(1);
-        verify(interceptor).preHandle(any(), any(), any());
-        verify(interceptor).afterCompletion(any(), any(), any(), any());
+        verify(interceptor).supports(any(), any());
+        verify(interceptor).beforeBodyWrite(any(), any(), any(), any(), any(), any());
     }
 }

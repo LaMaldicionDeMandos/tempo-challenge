@@ -1,32 +1,37 @@
 package com.tempo.challenge.controllers;
 
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import com.tempo.challenge.dto.ResultDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-@Slf4j
 @Component
-public class EndpointInterceptor implements HandlerInterceptor {
+@Slf4j
+@ControllerAdvice
+public class EndpointInterceptor implements ResponseBodyAdvice<ResultDto> {
+    private EndpointInterceptorExecutor executor;
+
+    @Autowired
+    public EndpointInterceptor(final EndpointInterceptorExecutor executor) {
+        this.executor = executor;
+    }
+
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        log.debug("Call intercptor pre handler");
+    public boolean supports(MethodParameter returnType, Class converterType) {
         return true;
     }
 
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
-        log.debug("Call interceptor post handler");
-    }
-    @Override
-    public void afterCompletion(HttpServletRequest request,
-                                HttpServletResponse response,
-                                Object handler,
-                                @Nullable Exception ex) throws Exception {
-        log.debug("Call intercptor after completion");
+    public ResultDto beforeBodyWrite(ResultDto body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        executor.postHandle(request, response, body);
+        return body;
     }
 }
