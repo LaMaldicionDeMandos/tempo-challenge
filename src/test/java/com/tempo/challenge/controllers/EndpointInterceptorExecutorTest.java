@@ -1,6 +1,5 @@
 package com.tempo.challenge.controllers;
 
-import ch.qos.logback.core.util.TimeUtil;
 import com.tempo.challenge.dto.ResultDto;
 import com.tempo.challenge.errors.BusinessModelError;
 import com.tempo.challenge.services.HistoryService;
