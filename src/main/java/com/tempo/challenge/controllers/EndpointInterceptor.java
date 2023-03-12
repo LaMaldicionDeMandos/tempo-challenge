@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @Component
 @Slf4j
 @ControllerAdvice
-public class EndpointInterceptor implements ResponseBodyAdvice<ResultDto> {
+public class EndpointInterceptor implements ResponseBodyAdvice<Object> {
     private EndpointInterceptorExecutor executor;
 
     @Autowired
@@ -30,8 +30,8 @@ public class EndpointInterceptor implements ResponseBodyAdvice<ResultDto> {
     }
 
     @Override
-    public ResultDto beforeBodyWrite(ResultDto body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        executor.postHandle(request, response, body);
+    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        executor.postHandle(request, body);
         return body;
     }
 }
