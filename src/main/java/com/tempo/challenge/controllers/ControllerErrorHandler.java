@@ -2,7 +2,9 @@ package com.tempo.challenge.controllers;
 
 import com.tempo.challenge.errors.BusinessException;
 import com.tempo.challenge.errors.BusinessModelError;
+import com.tempo.challenge.errors.RejectByLimitException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -29,6 +31,13 @@ public class ControllerErrorHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<BusinessModelError> handleBusinessError(final BusinessException ex) {
         return ResponseEntity.internalServerError()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(ex.getError());
+    }
+
+    @ExceptionHandler(RejectByLimitException.class)
+    public ResponseEntity<BusinessModelError> handleBusinessError(final RejectByLimitException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(ex.getError());
     }

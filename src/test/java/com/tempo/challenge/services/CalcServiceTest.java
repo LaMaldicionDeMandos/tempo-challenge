@@ -1,6 +1,7 @@
 package com.tempo.challenge.services;
 
 import com.tempo.challenge.errors.BusinessException;
+import com.tempo.challenge.errors.RejectByLimitException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,9 @@ public class CalcServiceTest {
     @MockBean
     private ExternalService externalService;
 
+    @MockBean
+    private RpmService rpmService;
+
     private BigDecimal number1;
     private BigDecimal number2;
 
@@ -31,20 +35,24 @@ public class CalcServiceTest {
     void correctSumWithFee() {
         givenANumber1();
         givenANumber2();
+        givenARpmServiceThatPermitProcess();
         givenAServiceThatReturnAFeeInPercent();
 
         whenTryToCalculateResult();
 
         thenShouldReturnAValidResult();
+        thenShouldNotRollbackRmpService();
     }
 
     @Test
     void externalServiceFailsFirstTime() {
         givenANumber1();
         givenANumber2();
+        givenARpmServiceThatPermitProcess();
         givenAServiceThatFails();
 
         assertThatThrownBy(() -> whenTryToCalculateResult()).isInstanceOf(BusinessException.class);
+        thenShouldRollbackRmpService();
 
     }
 
@@ -52,12 +60,25 @@ public class CalcServiceTest {
     void externalServiceFailsSecondTime() {
         givenANumber1();
         givenANumber2();
+        givenARpmServiceThatPermitProcess();
         givenAServiceThatFailsAfterSencondTime();
 
         whenTryToCalculateResult();
         whenTryToCalculateResult();
 
         thenShouldReturnAValidResult();
+        thenShouldNotRollbackRmpService();
+    }
+
+    @Test
+    void rejectedByRmp() {
+        givenANumber1();
+        givenANumber2();
+        givenARpmServiceThatRejectProcess();
+
+        assertThatThrownBy(() -> whenTryToCalculateResult()).isInstanceOf(RejectByLimitException.class);
+        thenShouldNotRollbackRmpService();
+
 
     }
 
@@ -83,11 +104,27 @@ public class CalcServiceTest {
                 .thenThrow(BusinessException.class);
     }
 
+    private void givenARpmServiceThatPermitProcess() {
+        when(rpmService.canProcess()).thenReturn(true);
+    }
+
+    private void givenARpmServiceThatRejectProcess() {
+        when(rpmService.canProcess()).thenReturn(false);
+    }
+
     private void whenTryToCalculateResult() {
         result = service.sumWithFee(number1, number2);
     }
 
     private void thenShouldReturnAValidResult() {
         assertEquals(BigDecimal.valueOf(22).intValueExact(), result.intValueExact());
+    }
+
+    private void thenShouldRollbackRmpService() {
+        verify(rpmService).rollback();
+    }
+
+    private void thenShouldNotRollbackRmpService() {
+        verify(rpmService, never()).rollback();
     }
 }

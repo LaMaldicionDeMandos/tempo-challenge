@@ -3,6 +3,7 @@ package com.tempo.challenge.controllers;
 import com.tempo.challenge.ChallengeApplication;
 import com.tempo.challenge.errors.BusinessException;
 import com.tempo.challenge.errors.BusinessModelError;
+import com.tempo.challenge.errors.RejectByLimitException;
 import com.tempo.challenge.services.CalcService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,6 +108,18 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
         thenInterceptorShouldBeCalled();
     }
 
+    @Test
+    void quoteExceeded() throws Exception {
+        givenANumber1();
+        givenANumber2();
+        givenAServiceThatExceededQuoteLimit();
+
+        whenTryToSum();
+
+        thenShouldCallService();
+        thenShould429LimitExceeded();
+    }
+
 
     private void givenANumber1() {
         number1 = "5";
@@ -128,6 +141,10 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
         when(service.sumWithFee(any(BigDecimal.class), any(BigDecimal.class))).thenThrow(
                 new BusinessException(new BusinessModelError("internal_error", "Error with external service."))
         );
+    }
+
+    private void givenAServiceThatExceededQuoteLimit() {
+        when(service.sumWithFee(any(BigDecimal.class), any(BigDecimal.class))).thenThrow(new RejectByLimitException());
     }
 
     private void whenTryToSumWithNoRequiredParams() throws Exception {
@@ -178,6 +195,14 @@ public class CalcControllerTest extends AbstractControllerTest<CalcController>{
                 .andExpect(header().string("Content-Type", "application/json"))
                 .andExpect(jsonPath("$.error_code", is("internal_error")))
                 .andExpect(jsonPath("$.error_message", is("Error with external service.")))
+                .andReturn();
+    }
+
+    private void thenShould429LimitExceeded() throws Exception {
+        result.andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Content-Type", "application/json"))
+                .andExpect(jsonPath("$.error_code", is("quote_exceeded")))
+                .andExpect(jsonPath("$.error_message", is("Limit quote exceeded.")))
                 .andReturn();
     }
 
