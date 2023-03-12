@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 @Component
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = CalcController.class)
 public class EndpointInterceptor implements ResponseBodyAdvice<Object> {
     private EndpointInterceptorExecutor executor;
 

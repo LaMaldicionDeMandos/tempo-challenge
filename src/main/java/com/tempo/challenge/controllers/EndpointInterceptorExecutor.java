@@ -39,7 +39,7 @@ public class EndpointInterceptorExecutor {
         return isNull(params) || params.isBlank() ? path : path + "?" + params;
     }
 
-    public String serializeJson(Object o) {
+    private String serializeJson(Object o) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String temp = "";
