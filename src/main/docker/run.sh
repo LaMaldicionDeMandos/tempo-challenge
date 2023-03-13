@@ -1,0 +1,1 @@
+java -Dspring.profiles.active=dev -jar /usr/local/service/tempo.jar
