@@ -17,8 +17,11 @@ spring:
   web:
     resources:
       add-mappings: false
-  redis:
-    host: redis://:p5a8bbf7ba0200192a6da4710bd02ab72294a2d380e955b932bb86c34cbf595ed@ec2-107-22-190-206.compute-1.amazonaws.com
-    port: 20379
+  data.redis:
+    host: localhost
+    password: redispw
+    port: 32768
   autoconfigure.exclude: "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
-app.cache.ttl: 1 #Cache by 1 second
+app:
+  cache.ttl: 1 #Cache by 1 second
+  quote: 3
