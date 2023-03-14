@@ -42,6 +42,13 @@ public class ControllerErrorHandler {
                 .body(ex.getError());
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<BusinessModelError> handleBusinessError(final RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(new BusinessModelError("unknown_error", "Unknown Error."));
+    }
+
     private ResponseEntity<BusinessModelError> createError(final String errorCode, final String errorMessage) {
         return ResponseEntity.badRequest()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

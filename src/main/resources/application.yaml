@@ -3,23 +3,24 @@ spring:
     active: dev
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
     datasource:
-      url: jdbc:h2:file:./data.sql
-      driver: org.h2.Driver
-      username: sa
-      initialization-mode: never
+      url: ${SPRING_DATASOURCE_URL}
+      driver-class-name: org.postgresql.Driver
+      username: ${SPRING_DATASOURCE_USERNAME}
+      password: ${SPRING_DATASOURCE_PASSWORD}
+      initialization-mode: update
   mvc:
     throw-exception-if-no-handler-found: true
   web:
     resources:
       add-mappings: false
-  redis:
-    host: "redis://:p5a8bbf7ba0200192a6da4710bd02ab72294a2d380e955b932bb86c34cbf595ed@ec2-107-22-190-206.compute-1.amazonaws.com"
-    port: 20379
+  data.redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
   autoconfigure.exclude: "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
 
 logging:

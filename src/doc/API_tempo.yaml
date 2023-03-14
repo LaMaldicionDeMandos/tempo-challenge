@@ -1,0 +1,269 @@
+openapi: 3.1.0
+x-stoplight:
+  id: 8j9fdtqn6mu02
+info:
+  title: tempo
+  version: '1.0'
+  summary: Tempo demo Calc with fee
+  description: 'Demo para Tempo, Endpoints de historia de operacions + suma con fee'
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /calc/plus:
+    get:
+      summary: GET Plus
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalcResult'
+              examples:
+                Example:
+                  value:
+                    result: 11
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+              examples:
+                Example:
+                  value:
+                    error_code: invalid_param
+                    error_message: Number 1 param must be a number.
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+              examples:
+                Example:
+                  value:
+                    error_code: quote_exceeded
+                    error_message: Limit quote exceeded.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+              examples:
+                Example:
+                  value:
+                    error_code: unknown_error
+                    error_message: Unknown Error.
+      operationId: get-calc-plus
+      description: Suma los dos Numeros y le agrega un fee.
+      parameters:
+        - schema:
+            type: number
+          in: query
+          name: number1
+          required: true
+        - schema:
+            type: number
+          in: query
+          name: number2
+          required: true
+  /history:
+    get:
+      summary: GET History
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+              examples:
+                Example:
+                  value:
+                    content:
+                      - id: '1234'
+                        path: /calc/plus?number1=5&number2=5
+                        result: '{"result": 11}'
+                    pageable:
+                      sort:
+                        empty: false
+                        unsorted: false
+                        sorted: true
+                      offset: 0
+                      pageNumber: 0
+                      pageSize: 1
+                      paged: true
+                      unpaged: false
+                    totalPages: 1
+                    totalElements: 1
+                    last: true
+                    size: 20
+                    number: 0
+                    sort:
+                      empty: false
+                      unsorted: false
+                      sorted: true
+                    numberOfElements: 1
+                    first: true
+                    empty: false
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessError'
+              examples:
+                Example 1:
+                  value:
+                    error_code: unknown_error
+                    error_message: Unknown Error.
+      operationId: get-history
+      description: Request history
+components:
+  schemas:
+    CalcResult:
+      title: CalcResult
+      x-stoplight:
+        id: tfarvglbfksa6
+      type: object
+      properties:
+        result:
+          type: number
+      examples:
+        - result: 11
+    BusinessError:
+      title: BusinessError
+      x-stoplight:
+        id: v9w7gv1d9a4ml
+      type: object
+      properties:
+        error_code:
+          type: string
+        error_message:
+          type: string
+      examples:
+        - error_code: invalid_param
+          error_message: Number 1 param must be a number.
+      description: ''
+    EndpointCalc:
+      title: EndpointCalc
+      x-stoplight:
+        id: 3qyrw07vd6f3d
+      type: object
+      properties:
+        id:
+          type: string
+        path:
+          type: string
+        result:
+          type: string
+      examples:
+        - id: '1234'
+          path: /calc/plus?number1=5&number2=5
+          result: '{"result": 11}'
+    Page:
+      title: Page
+      x-stoplight:
+        id: 5mv4bufrard4y
+      type: object
+      examples:
+        - content:
+            - id: '1234'
+              path: /calc/plus?number1=5&number2=5
+              result: '{"result": 11}'
+          pageable:
+            sort:
+              empty: false
+              unsorted: false
+              sorted: true
+            offset: 0
+            pageNumber: 0
+            pageSize: 1
+            paged: true
+            unpaged: false
+          totalPages: 1
+          totalElements: 1
+          last: true
+          size: 20
+          number: 0
+          sort:
+            empty: false
+            unsorted: false
+            sorted: true
+          numberOfElements: 1
+          first: true
+          empty: false
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointCalc'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        totalPages:
+          type: integer
+        totalElements:
+          type: integer
+        last:
+          type: boolean
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/Sort'
+        numberOfElements:
+          type: integer
+        first:
+          type: boolean
+        empty:
+          type: boolean
+      description: ''
+    Pageable:
+      title: Pageable
+      x-stoplight:
+        id: 4doe660wuj1sl
+      type: object
+      properties:
+        sort:
+          $ref: '#/components/schemas/Sort'
+        offset:
+          type: integer
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+      examples:
+        - sort:
+            empty: false
+            unsorted: false
+            sorted: true
+          offset: 0
+          pageNumber: 0
+          pageSize: 0
+          paged: true
+          unpaged: true
+    Sort:
+      title: Sort
+      x-stoplight:
+        id: olcvy1fbu2wmr
+      type: object
+      properties:
+        empty:
+          type: boolean
+        unsorted:
+          type: boolean
+        sorted:
+          type: boolean
+      examples:
+        - empty: false
+          unsorted: false
+          sorted: true
