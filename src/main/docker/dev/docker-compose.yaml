@@ -1,7 +1,8 @@
 version: "3.3"
 services:
   tempo:
-    image: tempo-demo:v4
+    image: lamaldiciondemandos/tempo-demo:v1
+
     ports:
       - "8080:8080"
     container_name: tempo
